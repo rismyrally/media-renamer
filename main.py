@@ -17,14 +17,17 @@ logging.basicConfig(
 
 def main():
     parser = argparse.ArgumentParser(description="Media Renamer Script")
-    parser.add_argument("--config", required=True, help="Path to config JSON file")
+    parser.add_argument(
+        "--config", required=True, help="Path to config JSON file (inside configs/)"
+    )
     args = parser.parse_args()
 
+    config_path = os.path.join("configs", args.config)
     try:
-        with open(args.config, "r") as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
     except Exception as e:
-        logging.critical(f"Failed to load config: {e}")
+        logging.critical(f"Failed to load config {args.config}: {e}")
         return
 
     api_key = os.getenv("TMDB_API_KEY")
