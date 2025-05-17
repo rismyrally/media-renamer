@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from core.renamer import rename_files
-from core.tmdb_client import build_episode_map
+from core.tmdb_client import TMDBClient
 
 load_dotenv()
 
@@ -32,7 +32,8 @@ def main():
         logging.critical("TMDB_API_KEY not set in .env file.")
         return
 
-    episode_map = build_episode_map(api_key, config["show_id"])
+    tmdb_client = TMDBClient(api_key)
+    episode_map = tmdb_client.build_episode_map(config["show_id"])
     rename_files(episode_map, config)
 
 if __name__ == "__main__":
