@@ -34,7 +34,7 @@ def main():
 
     tmdb_client = TMDBClient(api_key)
     episode_map = tmdb_client.build_episode_map(config["show_id"])
-    rename_files(episode_map, config)
+    rename_files(config["source_dir"], episode_map, config)
 
 if __name__ == "__main__":
     main()
