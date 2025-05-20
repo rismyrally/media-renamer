@@ -20,6 +20,11 @@ def main():
     parser.add_argument(
         "--config", required=True, help="Path to config JSON file (inside configs/)"
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate the renaming without making changes",
+    )
     args = parser.parse_args()
 
     config_path = os.path.join("configs", args.config)
@@ -36,8 +41,19 @@ def main():
         return
 
     tmdb_client = TMDBClient(api_key)
+    show_details = tmdb_client.get_show_details(config["show_id"])
     episode_map = tmdb_client.build_episode_map(config["show_id"])
-    rename_files(config["source_dir"], episode_map, config)
+
+    rename_files(
+        show_details=show_details,
+        source_dir=config["source_dir"],
+        target_dir=config["target_dir"],
+        episode_map=episode_map,
+        file_pattern=config.get("file_pattern", ""),
+        use_named_season=config.get("use_named_season", False),
+        move_files=config.get("move_files", True),
+        dry_run=args.dry_run,
+    )
 
 if __name__ == "__main__":
     main()
