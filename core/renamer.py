@@ -2,48 +2,69 @@ import logging
 import os
 import re
 import shutil
+from pathlib import Path
+from core.utils import sanitize_filename, extract_episode_number
 
 
 def sanitize(name):
     return re.sub(r'[\\\\/:*?"<>|]', "", name)
 
 
-def rename_files(source_dir, episode_map, config):
-    for filename in os.listdir(source_dir):
-        if not filename.lower().endswith((".mkv", ".mp4", ".avi")):
+def rename_files(
+    show_details,
+    source_dir,
+    target_dir,
+    episode_map,
+    file_pattern,
+    use_named_season,
+    move_files,
+    dry_run,
+):
+    show_title = f"{show_details['name']} ({show_details['first_air_date'][:4]})"
+    target_root = Path(target_dir) / sanitize_filename(show_title)
+
+    source_path = Path(source_dir)
+    matched_files = list(source_path.rglob(file_pattern or "*.mkv"))
+
+    if not matched_files:
+        logging.warning("No files matched in the source directory.")
+        return
+
+    for file in matched_files:
+        episode_num = extract_episode_number(file.name)
+        if episode_num is None:
+            logging.warning(f"Skipping file (episode number not found): {file.name}")
             continue
 
-        match = re.search(r"(\d{4})", filename)
-        if not match:
-            logging.warning(f"Skipped (no episode number): {filename}")
-            continue
-
-        episode_num = int(match.group(1))
-        episode_info = episode_map.get(episode_num)
-
+        episode_info = episode_map.get(str(episode_num))
         if not episode_info:
-            logging.warning(f"Skipped (not found in TMDB map): {filename}")
+            logging.warning(f"No TMDB info for episode {episode_num}")
             continue
 
-        season_name = sanitize(
-            f"Season {episode_info['season_number']}- {episode_info['season_name']}"
+        season_number = episode_info["season_number"]
+        episode_title = episode_info["name"]
+        season_name = episode_info.get("season_name", "")
+
+        season_folder = (
+            f"Season {season_number}- {sanitize_filename(season_name)}"
+            if use_named_season
+            else f"Season {season_number}"
         )
-        episode_folder = sanitize(
-            f"Episode {episode_num} - {episode_info['episode_name']}"
+        episode_folder = f"Episode {episode_info['episode_number']:02d} - {sanitize_filename(episode_title)}"
+        target_episode_path = target_root / season_folder / episode_folder
+        target_episode_path.mkdir(parents=True, exist_ok=True)
+
+        target_file_name = (
+            f"S{season_number:02d}E{episode_info['episode_number']:02d}{file.suffix}"
         )
-        new_filename = (
-            f"S{episode_info['season_number']:02d}E{episode_num:03d}"
-            + os.path.splitext(filename)[1]
+        target_file_path = target_episode_path / target_file_name
+
+        logging.info(
+            f"{'[DRY RUN] ' if dry_run else ''}{'Moving' if move_files else 'Copying'} {file} -> {target_file_path}"
         )
 
-        target_dir = os.path.join(source_dir, season_name, episode_folder)
-        os.makedirs(target_dir, exist_ok=True)
-
-        src_path = os.path.join(source_dir, filename)
-        dst_path = os.path.join(target_dir, new_filename)
-
-        try:
-            shutil.move(src_path, dst_path)
-            logging.info(f"Renamed: {filename} -> {dst_path}")
-        except Exception as e:
-            logging.error(f"Failed to move {filename}: {e}")
+        if not dry_run:
+            if move_files:
+                shutil.move(str(file), str(target_file_path))
+            else:
+                shutil.copy2(str(file), str(target_file_path))
