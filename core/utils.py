@@ -12,23 +12,21 @@ def sanitize_filename(name: str) -> str:
     # return re.sub(r'[\\\\/:*?"<>|]', "", name)
 
 
-def extract_episode_number(filename: str, pattern: str) -> int | None:
+def extract_episode_number(
+    full_relative_path: str, file_pattern: str | None = None
+) -> int | None:
     """
-    Extracts the episode number from the filename assuming format like:
-    'Show - 0144 - Title' or 'S01E05'
-    Returns episode number as int or None
+    Extracts season and episode number from the full relative path using a file_pattern.
+    Returns a unique key as season * 100 + episode, or None.
     """
 
-    # Match patterns like 0144
-    match = re.search(r"(\d{3,4})", filename)
-    if match:
-        return int(match.group(1))
-
-    # Match S01E05 or s01e05
-    match = re.search(r"[sS](\d+)[eE](\d+)", filename)
-    if match:
-        season = int(match.group(1))
-        episode = int(match.group(2))
-        return season * 100 + episode
-
+    if file_pattern:
+        match = re.search(file_pattern, full_relative_path, re.IGNORECASE)
+        if match:
+            try:
+                season = int(match.group(1))
+                episode = int(match.group(2))  # or group(3) based on pattern structure
+                return season * 100 + episode
+            except (IndexError, ValueError):
+                return None
     return None
