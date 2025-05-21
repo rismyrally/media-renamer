@@ -20,51 +20,41 @@ def rename_files(
     move_files,
     dry_run,
 ):
-    show_title = f"{show_details['name']} ({show_details['first_air_date'][:4]})"
-    target_root = Path(target_dir) / sanitize_filename(show_title)
+    show_title = f"{sanitize_filename(show_details['name'])} ({show_details['first_air_date'][:4]})"
 
-    source_path = Path(source_dir)
-    matched_files = list(source_path.rglob(file_pattern or "*.mkv"))
+    for root, _, files in os.walk(source_dir):
+        for file in files:
+            if not file.lower().endswith((".mkv", ".mp4", ".avi")):
+                continue
 
-    if not matched_files:
-        logging.warning("No files matched in the source directory.")
-        return
+            full_source_path = os.path.join(root, file)
+            rel_path = os.path.relpath(full_source_path, source_dir)
+            episode_key = extract_episode_number(rel_path, file_pattern)
 
-    for file in matched_files:
-        episode_num = extract_episode_number(file.name)
-        if episode_num is None:
-            logging.warning(f"Skipping file (episode number not found): {file.name}")
-            continue
+            if episode_key not in episode_map:
+                logging.warning(f"Skipping unmatched file: {rel_path}")
+                continue
 
-        episode_info = episode_map.get(str(episode_num))
-        if not episode_info:
-            logging.warning(f"No TMDB info for episode {episode_num}")
-            continue
+            episode_info = episode_map[episode_key]
+            season_folder = f"Season {episode_info['season_number']}"
+            if use_named_season:
+                season_folder += f"- {sanitize_filename(episode_info['season_name'])}"
 
-        season_number = episode_info["season_number"]
-        episode_title = episode_info["name"]
-        season_name = episode_info.get("season_name", "")
+            episode_folder = f"Episode {episode_info['episode_number']:02d} - {sanitize_filename(episode_info['episode_name'])}"
+            episode_filename = f"S{episode_info['season_number']:02d}E{episode_info['episode_number']:02d}{os.path.splitext(file)[1]}"
 
-        season_folder = (
-            f"Season {season_number}- {sanitize_filename(season_name)}"
-            if use_named_season
-            else f"Season {season_number}"
-        )
-        episode_folder = f"Episode {episode_info['episode_number']:02d} - {sanitize_filename(episode_title)}"
-        target_episode_path = target_root / season_folder / episode_folder
-        target_episode_path.mkdir(parents=True, exist_ok=True)
+            final_dir = os.path.join(
+                target_dir, show_title, season_folder, episode_folder
+            )
+            final_path = os.path.join(final_dir, episode_filename)
 
-        target_file_name = (
-            f"S{season_number:02d}E{episode_info['episode_number']:02d}{file.suffix}"
-        )
-        target_file_path = target_episode_path / target_file_name
+            logging.info(
+                f"{'[DRY RUN] ' if dry_run else ''}{'Moving' if move_files else 'Copying'} {file} -> {final_path}"
+            )
 
-        logging.info(
-            f"{'[DRY RUN] ' if dry_run else ''}{'Moving' if move_files else 'Copying'} {file} -> {target_file_path}"
-        )
-
-        if not dry_run:
-            if move_files:
-                shutil.move(str(file), str(target_file_path))
-            else:
-                shutil.copy2(str(file), str(target_file_path))
+            if not dry_run:
+                os.makedirs(final_dir, exist_ok=True)
+                if move_files:
+                    shutil.move(full_source_path, final_path)
+                else:
+                    shutil.copy2(full_source_path, final_path)
