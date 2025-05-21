@@ -2,16 +2,21 @@
 
 A modular Python tool to rename and organize TV show and movie files using TMDb metadata.
 
-## Features
+## 🔧 Features
 
 - Uses TMDB to fetch show, episode, and season details.
 - Renames and organizes files into proper folder structure.
+- Supports complex directory layouts with regex-based matching
+- Organizes media into Kodi-friendly structure:
+  `Show Name (Year)/Season X - Arc Name/Episode XX - Title/`
 - Configurable for any TV show using simple JSON configs.
+- Dry-run mode to preview changes safely
+- Supports both move or copy operations
 
-## Requirements
+## 🧪 Requirements
 
 - Python 3.7+
-- TMDB account + API key
+- A free [TMDB API key](https://www.themoviedb.org/settings/api)
 
 ## Setup
 
@@ -25,24 +30,40 @@ cp .env.example .env
 # set your TMDB_API_KEY in .env
 ```
 
-## Usage
+## ▶️ Usage
 
 ```sh
 python main.py --config one_piece.json
 ```
 Configs are stored in the `configs/` folder.
 
-## Config Structure (`configs/one_piece.json`)
+## 📁 Config File Structure
 
 ```json
 {
   "show_id": 37854,
-  "source_dir": "D:/One Piece (1999)"
+  "source_dir": "D:/One Piece",
+  "target_dir": "D:/",
+  "file_pattern": "One Piece/Season (\\d+)/Episode (\\d+).*?/Episode (\\d+)",
+  "use_named_season": true,
+  "move_files": true
 }
 ```
+### Config Fields
 
-## Output Structure
+| Field              | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `show_id`          | TMDB show ID                                               |
+| `source_dir`       | Directory containing your existing media files             |
+| `target_dir`       | Where to place renamed files (can be same as source)       |
+| `file_pattern`     | Regex to extract season and episode numbers from full path |
+| `use_named_season` | Add arc/season name to folder (e.g., `Season 6- Skypiea`)  |
+| `move_files`       | `true` to move files, `false` to copy                      |
 
+
+## 📂 Output Structure
+
+Example output for One Piece:
 ```
 One Piece (1999)/
 ├── Season 6- Skypiea/
