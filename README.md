@@ -32,9 +32,20 @@ cp .env.example .env
 
 ## ▶️ Usage
 
+Run the script with your config file:
+
 ```sh
 python main.py --config one_piece.json
 ```
+### Optional Flags
+- `--dry-run`
+  Simulate the renaming process without actually moving or copying any files.
+
+**Example:**
+```sh
+python main.py --config one_piece.json --dry-run
+```
+
 Configs are stored in the `configs/` folder.
 
 ## 📁 Config File Structure
