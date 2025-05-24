@@ -1,19 +1,15 @@
 import argparse
 import json
-import logging
 import os
 from dotenv import load_dotenv
 
+from core.logger import get_logger
 from core.renamer import rename_files
 from core.tmdb_client import TMDBClient
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s: %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S",  # ISO 8601 without timezone
-)
+logger = get_logger(__name__)
 
 def main():
     parser = argparse.ArgumentParser(description="Media Renamer Script")
@@ -32,12 +28,12 @@ def main():
         with open(config_path, "r") as f:
             config = json.load(f)
     except Exception as e:
-        logging.critical(f"Failed to load config {args.config}: {e}")
+        logger.critical(f"Failed to load config {args.config}: {e}")
         return
 
     api_key = os.getenv("TMDB_API_KEY")
     if not api_key:
-        logging.critical("TMDB_API_KEY not set in .env file.")
+        logger.critical("TMDB_API_KEY not set in .env file.")
         return
 
     tmdb_client = TMDBClient(api_key)

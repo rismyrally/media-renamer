@@ -1,10 +1,12 @@
-import logging
 import os
 import re
 import shutil
 from pathlib import Path
+
+from core.logger import get_logger
 from core.utils import sanitize_filename, extract_episode_number
 
+logger = get_logger(__name__)
 
 def sanitize(name):
     return re.sub(r'[\\\\/:*?"<>|]', "", name)
@@ -32,7 +34,7 @@ def rename_files(
             episode_key = extract_episode_number(rel_path, file_pattern)
 
             if episode_key not in episode_map:
-                logging.warning(f"Skipping unmatched file: {rel_path}")
+                logger.warning(f"Skipping unmatched file: {rel_path}")
                 continue
 
             episode_info = episode_map[episode_key]
@@ -48,7 +50,7 @@ def rename_files(
             )
             final_path = os.path.join(final_dir, episode_filename)
 
-            logging.info(
+            logger.info(
                 f"{'[DRY RUN] ' if dry_run else ''}{'Moving' if move_files else 'Copying'} {file} -> {final_path}"
             )
 

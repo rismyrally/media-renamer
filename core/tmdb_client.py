@@ -1,19 +1,20 @@
 import tmdbsimple as tmdb
-import logging
 
+from core.logger import get_logger
+
+logger = get_logger(__name__)
 
 class TMDBClient:
 
     def __init__(self, api_key: str):
         tmdb.API_KEY = api_key
-        self.logger = logging.getLogger(__name__)
 
     def get_show_details(self, show_id: int):
         try:
             show = tmdb.TV(show_id)
             return show.info()
         except Exception as e:
-            self.logger.error(f"Error fetching show details for ID {show_id}: {e}")
+            logger.error(f"Error fetching show details for ID {show_id}: {e}")
             return None
 
     def build_episode_map(self, show_id: int):
@@ -39,5 +40,5 @@ class TMDBClient:
                     }
             return episode_map
         except Exception as e:
-            self.logger.error(f"Error building episode map for show ID {show_id}: {e}")
+            logger.error(f"Error building episode map for show ID {show_id}: {e}")
             return {}
