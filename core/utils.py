@@ -29,10 +29,10 @@ def is_video_file(filename: str) -> bool:
 
 def extract_episode_number(
     full_relative_path: str, file_pattern: str | None = None
-) -> int | None:
+) -> tuple | None:
     """
     Extracts season and episode number from the full relative path using a file_pattern.
-    Returns a unique key as season * 100 + episode, or None.
+    Returns a tuple (season, episode) if extraction is successful, otherwise None.
     """
 
     if file_pattern:
@@ -40,8 +40,8 @@ def extract_episode_number(
         if match:
             try:
                 season = int(match.group(1))
-                episode = int(match.group(2))  # or group(3) based on pattern structure
-                return season * 100 + episode
+                episode = int(match.group(2))
+                return (season, episode)
             except (IndexError, ValueError):
                 return None
     return None
