@@ -4,8 +4,9 @@ import os
 from dotenv import load_dotenv
 
 from core.logger import get_logger
-from core.renamer import rename_files
 from core.tmdb_client import TMDBClient
+from core.renamer import rename_files
+from core.legacy_renamer import rename_legacy_structure
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ def main():
         action="store_true",
         help="Simulate the renaming without making changes",
     )
+    parser.add_argument("--legacy", action="store_true", help="Use legacy renaming")
     args = parser.parse_args()
 
     config_path = os.path.join("configs", args.config)
@@ -40,16 +42,24 @@ def main():
     show_details = tmdb_client.get_show_details(config["show_id"])
     episode_map = tmdb_client.build_episode_map(config["show_id"])
 
-    rename_files(
-        show_details=show_details,
-        source_dir=config["source_dir"],
-        target_dir=config["target_dir"],
-        episode_map=episode_map,
-        file_pattern=config.get("file_pattern", ""),
-        use_named_season=config.get("use_named_season", False),
-        move_files=config.get("move_files", True),
-        dry_run=args.dry_run,
-    )
+    if args.legacy:
+        logger.info("Using legacy renamer")
+        rename_legacy_structure(
+            show_details=show_details,
+            base_dir=config["source_dir"],
+            dry_run=args.dry_run,
+        )
+    else:
+        rename_files(
+            show_details=show_details,
+            source_dir=config["source_dir"],
+            target_dir=config["target_dir"],
+            episode_map=episode_map,
+            file_pattern=config.get("file_pattern", ""),
+            use_named_season=config.get("use_named_season", False),
+            move_files=config.get("move_files", True),
+            dry_run=args.dry_run,
+        )
 
 if __name__ == "__main__":
     main()
