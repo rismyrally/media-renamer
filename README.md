@@ -41,9 +41,22 @@ python main.py --config one_piece.json
 - `--dry-run`
   Simulate the renaming process without actually moving or copying any files.
 
-**Example:**
+- `--legacy`
+  Use the legacy-style renaming based on directory structure, renames the files and base_dir only
+
+**Examples:**
+
+Dry-run mode:
 ```sh
 python main.py --config one_piece.json --dry-run
+```
+Legacy mode:
+```sh
+python main.py --config one_piece.json --legacy
+```
+Both:
+```sh
+python main.py --config one_piece.json --dry-run --legacy
 ```
 
 Configs are stored in the `configs/` folder.
