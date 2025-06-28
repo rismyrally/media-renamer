@@ -44,7 +44,9 @@ def rename_episodes_in_season(season_path: str, season_number: int, dry_run: boo
                     logger.warning(f"❌ skipping (already exists): {new_path}")
                     continue
 
-                logger.info(f"🔄 renaming: {old_path} → {new_path}")
+                logger.info(
+                    f"🔄 {'[DRY RUN] ' if dry_run else ''}renaming: {old_path} → {new_path}"
+                )
 
                 if not dry_run:
                     os.rename(old_path, new_path)
@@ -60,7 +62,9 @@ def rename_base_directory(old_path: str, show_name: str, year: str, dry_run: boo
     new_path = os.path.join(parent_dir, new_dir_name)
 
     try:
-        logger.info(f"🏷️ renaming base directory: {old_path} → {new_path}")
+        logger.info(
+            f"🏷️ {'[DRY RUN] ' if dry_run else ''}renaming base directory: {old_path} → {new_path}"
+        )
         if not dry_run:
             os.rename(old_path, new_path)
     except Exception:
@@ -70,7 +74,9 @@ def rename_base_directory(old_path: str, show_name: str, year: str, dry_run: boo
 
 def rename_legacy_structure(show_details, base_dir, dry_run):
     try:
+        logger.info("🔍 fetching metadata")
         show_title, show_year = fetch_show_metadata(show_details)
+        logger.info(f"🎬 fetched metadata for: {show_title} [{show_year}]")
 
         logger.info(f"📁 renaming episodes in: {base_dir}")
         for season_dir in os.listdir(base_dir):

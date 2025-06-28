@@ -40,7 +40,6 @@ def main():
 
     tmdb_client = TMDBClient(api_key)
     show_details = tmdb_client.get_show_details(config["show_id"])
-    episode_map = tmdb_client.build_episode_map(config["show_id"])
 
     if args.legacy:
         logger.info("Using legacy renamer")
@@ -50,16 +49,21 @@ def main():
             dry_run=args.dry_run,
         )
     else:
-        rename_files(
-            show_details=show_details,
-            source_dir=config["source_dir"],
-            target_dir=config["target_dir"],
-            episode_map=episode_map,
-            file_pattern=config.get("file_pattern", ""),
-            use_named_season=config.get("use_named_season", False),
-            move_files=config.get("move_files", True),
-            dry_run=args.dry_run,
-        )
+        episode_map = tmdb_client.build_episode_map(config["show_id"])
+
+        try:
+            rename_files(
+                show_details=show_details,
+                source_dir=config["source_dir"],
+                target_dir=config["target_dir"],
+                episode_map=episode_map,
+                file_pattern=config.get("file_pattern", ""),
+                use_named_season=config.get("use_named_season", False),
+                move_files=config.get("move_files", True),
+                dry_run=args.dry_run,
+            )
+        except Exception as e:
+            logger.critical(f"💥 fatal error: {e}")
 
 if __name__ == "__main__":
     main()

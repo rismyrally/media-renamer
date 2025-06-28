@@ -35,7 +35,7 @@ class TMDBClient:
                     episode_map[(season_number, episode_number)] = {
                         "season_number": season_number,
                         "episode_number": episode_number,
-                        "name": episode["name"],
+                        "episode_name": episode["name"],
                         "season_name": season.get("name", f"Season {season_number}"),
                     }
             return episode_map

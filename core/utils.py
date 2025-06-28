@@ -7,9 +7,9 @@ def sanitize_filename(name: str) -> str:
     Removes characters not allowed in file or folder names.
     """
 
-    valid_chars = f"-_.() {string.ascii_letters}{string.digits}"
-    return "".join(c for c in name if c in valid_chars).strip()
-    # return re.sub(r'[\\\\/:*?"<>|]', "", name)
+    # valid_chars = f"-_.() {string.ascii_letters}{string.digits}"
+    # return "".join(c for c in name if c in valid_chars).strip()
+    return re.sub(r'[\\\\/:*?"<>|]', "", name)
 
 
 def is_video_file(filename: str) -> bool:
