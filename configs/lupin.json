@@ -1,0 +1,20 @@
+{
+  "show_id": 96677,
+  "source_dir": "/home/user/D/Lupin",
+  "target_dir": "/home/user/T",
+  "file_pattern": "S(\\d{1,2})E(\\d{1,2})",
+  "use_named_season": false,
+  "move_files": true,
+  "episode_mapping": {
+    "2": {
+      "season": 1,
+      "episode_offset": 5
+    },
+    "3": {
+      "season": 2
+    },
+    "4": {
+      "season": 3
+    }
+  }
+}

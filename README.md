@@ -37,7 +37,9 @@ Run the script with your config file:
 ```sh
 python main.py --config one_piece.json
 ```
+
 ### Optional Flags
+
 - `--dry-run`
   Simulate the renaming process without actually moving or copying any files.
 
@@ -47,14 +49,19 @@ python main.py --config one_piece.json
 **Examples:**
 
 Dry-run mode:
+
 ```sh
 python main.py --config one_piece.json --dry-run
 ```
+
 Legacy mode:
+
 ```sh
 python main.py --config one_piece.json --legacy
 ```
+
 Both:
+
 ```sh
 python main.py --config one_piece.json --dry-run --legacy
 ```
@@ -73,6 +80,7 @@ Configs are stored in the `configs/` folder.
   "move_files": true
 }
 ```
+
 ### Config Fields
 
 | Field              | Description                                                |
@@ -84,10 +92,10 @@ Configs are stored in the `configs/` folder.
 | `use_named_season` | Add arc/season name to folder (e.g., `Season 6- Skypiea`)  |
 | `move_files`       | `true` to move files, `false` to copy                      |
 
-
 ## 📂 Output Structure
 
 Example output for One Piece:
+
 ```
 One Piece (1999)/
 ├── Season 6- Skypiea/
@@ -100,3 +108,19 @@ One Piece (1999)/
 
 - File names must include a 4-digit episode number (e.g. `One Piece - 0144 - ...`).
 - You can add more configs for other shows in `configs/`.
+
+## Shows with different file numbering and TMDB numbering
+
+Optionally set `episode_mapping` in a show's config. Keys are **source season numbers as strings**. `season` changes the TMDB season to look up, and `episode_offset` is added to the source episode number (default: 0). Unmapped seasons are unchanged.
+
+For _Lupin_, Netflix-style four-part filenames versus TMDB's three-season ordering:
+
+```json
+"episode_mapping": {
+  "2": {"season": 1, "episode_offset": 5},
+  "3": {"season": 2},
+  "4": {"season": 3}
+}
+```
+
+For example `S02E03` looks up TMDB `S01E08`; `S04E05` looks up `S03E05`. The renamed destination uses the **TMDB** season/episode, matching the selected Kodi metadata ordering. Run `--dry-run` first. Other show configs do not need this field.

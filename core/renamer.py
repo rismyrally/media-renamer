@@ -21,6 +21,7 @@ def rename_files(
     use_named_season,
     move_files,
     dry_run,
+    episode_mapping=None,
 ):
     show_title = f"{sanitize_filename(show_details['name'])} ({show_details['first_air_date'][:4]})"
 
@@ -32,6 +33,18 @@ def rename_files(
             full_source_path = os.path.join(root, file)
             rel_path = os.path.relpath(full_source_path, source_dir)
             episode_key = extract_episode_number(rel_path, file_pattern)
+
+            if episode_key is None:
+                logger.warning(f"Skipping file with no episode match: {rel_path}")
+                continue
+
+            # Optional per-show translation from file numbering to TMDB numbering.
+            mapping = (episode_mapping or {}).get(str(episode_key[0]))
+            if mapping is not None:
+                episode_key = (
+                    mapping.get("season", episode_key[0]),
+                    episode_key[1] + mapping.get("episode_offset", 0),
+                )
 
             if episode_key not in episode_map:
                 logger.warning(f"Skipping unmatched file: {rel_path}")

@@ -61,6 +61,7 @@ def main():
                 use_named_season=config.get("use_named_season", False),
                 move_files=config.get("move_files", True),
                 dry_run=args.dry_run,
+                episode_mapping=config.get("episode_mapping"),
             )
         except Exception as e:
             logger.critical(f"💥 fatal error: {e}")
