@@ -23,7 +23,8 @@ def rename_files(
     dry_run,
     episode_mapping=None,
 ):
-    show_title = f"{sanitize_filename(show_details['name'])} ({show_details['first_air_date'][:4]})"
+    show_name = sanitize_filename(show_details['name'].replace(':', '-'))
+    show_title = f"{show_name} ({show_details['first_air_date'][:4]})"
 
     for root, _, files in os.walk(source_dir):
         for file in files:
@@ -55,7 +56,8 @@ def rename_files(
             if use_named_season:
                 season_folder += f"- {sanitize_filename(episode_info['season_name'])}"
 
-            episode_folder = f"Episode {episode_info['episode_number']:02d} - {sanitize_filename(episode_info['episode_name'])}"
+            episode_name = sanitize_filename(episode_info['episode_name'].replace(':', '-'))
+            episode_folder = f"Episode {episode_info['episode_number']:02d} - {episode_name}"
             episode_filename = f"S{episode_info['season_number']:02d}E{episode_info['episode_number']:02d}{os.path.splitext(file)[1]}"
 
             final_dir = os.path.join(
